@@ -1,5 +1,3 @@
-from itertools import count
-from locale import RADIXCHAR
 import os
 import shutil
 from tkinter import E
@@ -7,7 +5,7 @@ from colorama import Fore, init, Back, Style
 import time
 init(autoreset=True)
 
-title  =(Style.BRIGHT + Back.WHITE + Fore.RED + "Automatic Sorting System - By Sergiy Grimoldi ")
+title  =(Style.BRIGHT + Back.WHITE + Fore.RED + "Automatic Sorting System V2- By Sergiy Grimoldi ")
 
 def clear():
     try:
@@ -35,6 +33,7 @@ def main():
         None
     
     count_done = 0 
+    count_undone = 0
 
     for file in files: 
 
@@ -55,32 +54,51 @@ def main():
             os.makedirs(check_if_exsist) 
 
             try:
-                shutil.move(full_dir_file, check_if_exsist) 
+                shutil.move(full_dir_file, check_if_exsist,dirs_exist_ok=True) 
                 count_done+=1
             
             except Exception as e:
                 print(e)
 
         else: 
+            file_name = str(full_dir_file.split("/")[-1])
+            
             try:
                 shutil.move(full_dir_file, check_if_exsist) 
+                
                 count_done+=1 
                
                 with open ("/Users/s.grimoldi/log_sorting_download_folder.csv", "a+") as l:
-                    file_name = str(full_dir_file.split("/")[-1])
-                    log = f"File < {Fore.RED + file_name +Fore.RESET} > moved to < {Fore.GREEN + check_if_exsist + Fore.RESET} >\n"
-                    l.write(log)
+        
+                    log = f"File {Fore.RED + file_name +Fore.RESET} moved to {Fore.GREEN + check_if_exsist + Fore.RESET}"
+                    log_to_write = f"{filename} -> {check_if_exsist}"
+                    l.write(log_to_write)
                     print(log)
+
                 l.close()
 
 
             except Exception as e:
-                print(e) 
+                
+                error = (str(e).split(" ")[-2])
+
+                if error == "already":
+                    print(f"File ({Fore.RED + file_name +Fore.RESET}) already exists;")
+                    count_undone+=1
+                
+    if count_undone>0:
+        status = f"\nNothing else to do, {Fore.RED + str(count_undone) +Fore.RESET} files are not sorted.\n\nRename files or delete it before run this program again"
+        print(f"{status}")
+        time.sleep(5)
+        clear()
+        exit()
+
+
                 
          
     if count_done==0:
-        status = "Nothing to do, all files are sorted."
-        print(f"{Fore.RED + status +Fore.RESET}")
+        status = "Nothing else to do, all files are sorted."
+        print(f"{status}")
         time.sleep(5)
         clear()
         exit()
